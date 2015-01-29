@@ -25,7 +25,7 @@ pd_sorted <- prol_diff[order(prol_diff$Pseudotime),]
 
 N <- dim(pd_sorted)[1]
 state1_cells <- as.character(pd_sorted$cell_id[1:20])
-state2_cells <- as.character(pd_sorted$cell_id[(N-20):N])
+state2_cells <- as.character(pd_sorted$cell_id[(N-19):N])
 
 gse_no <- "GSE52529"
 gse <- getGEO(gse_no)
@@ -82,3 +82,9 @@ writeLines(c(alias,type2_cmd), fileConn2)
 close(fileConn2)
 
 # Then run download_type1, move all to particular directory and repeat for download_type2
+
+
+## now create makefiles for converting fastq-dumps
+
+
+
