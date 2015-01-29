@@ -9,11 +9,15 @@ kieran.campbell@dpag.ox.ac.uk
 
 """
 
-import os
+import os, sys
 import numpy as np
+import gzip
 
 class SyntheticAdmixCreator:
-	"""Take single-cell data and create synthetic bulk data """
+	"""Take single-cell data and create synthetic bulk data 
+
+	NB: have to be very careful that we always access the dictionary in the order
+	of cell directories, as order not preserved in python dictionaries """
 
 	def __init__(self, cell_directories, mixing_coefficients, 
 		total_reads, output_fastq, paired_end = True):
@@ -46,13 +50,15 @@ class SyntheticAdmixCreator:
 		self.cell_fastq_dict = {}
 		self.cell_dict = {}
 		self.cells_per_type = None
-
+		self.output_file = None
 
 		self._get_ncells()
 		if self.paired_end:
 			self._find_paired_ends()
+			self.output_file = [self.output_fastq.replace(".fastq.gz","") + x + ".fastq.gz" for x in ('_1','_2')]
 		else:
 			self._trim_dict()
+			self.output_file = [self.output_fastq]
 
 	def _check_inputs(self, cell_directories, mixing_coefficients):
 
@@ -95,5 +101,57 @@ class SyntheticAdmixCreator:
 		""" Creates self.cell_dict from self.cell_fastq_dict by trimming .fastq.gz off end """
 		for celltype, fastq_list in self.cell_fastq_dict.iteritems():
 			self.cell_dict[celltype] = [x.replace("fastq.gz","") for x in fastq_list]
+
+	def cellIO(self):
+
+		outfilestreams = [gzip.open(f,'wb') for f in self.output_file]
+
+		for i in range(len(self.cell_directories)):
+			""" iterate over each type of cell """
+			cell_type = self.cell_directories[i]
+			reads_per_cell = self.assigned_reads_per_cell[i] # select reads_per_cell from 
+			for cell in self.cell_dict[cell_type]:
+				self._write_one_cell(cell_type, cell, reads_per_cell, outfilestreams)
+
+
+		[f.close() for f in outfilestreams]
+
+	def _write_one_cell(self, directory, cell_file, reads_per_cell, outfilestream):
+		""" select reads_per_cell reads at random from cell file in directory, and output
+		to outfilestream """
+		if self.paired_end:
+			print "Reading %s" % cell_file
+			fs = [gzip.open(os.path.join(directory, f),'rb') for f in [cell_file + x + ".fastq.gz" for x in ("_1","_2")]]
+			
+			lines = [f.readlines() for f in fs]
+			n_lines = [len(l) for l in lines]
+
+			assert n_lines[0] == n_lines[1], "Paired end reads must have equal number of lines in _1 and _2 files"
+			n_lines = n_lines[0]
+			assert n_lines % 4 == 0, "Number of lines in %s  and %s is not a multiple of 4" % cell_file
+			
+
+			""" now select reads_per_cell from n_lines """
+			chosen_lines = np.random.choice(n_lines / 4,  reads_per_cell) * 4
+
+			for l in chosen_lines:
+				[outfilestream[i].writelines(lines[i][l:(l+4)]) for i in (0,1)]
+			lines = None
+			[f.close() for f in fs]
+
+		else:
+			print  "Non-paired-end currently not supported"
+			sys.exit(1)
+
+
+
+
+
+
+
+
+
+
+
 
 
