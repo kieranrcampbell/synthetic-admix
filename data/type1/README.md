@@ -1,0 +1,1 @@
+This directory holds the data of type 1 cells (proliferating if using monocle dataset)

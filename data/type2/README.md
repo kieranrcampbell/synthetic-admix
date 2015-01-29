@@ -1,0 +1,1 @@
+This directory holds the data of type 2 cells (differentiating if using monocle dataset)
