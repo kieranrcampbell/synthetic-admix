@@ -11,7 +11,7 @@ Paths to data - edit to correct
 """
 type1_dir = '/net/isi-scratch/kieran/admix/synthetic/synthetic-admix/data/type1'
 type2_dir =  '/net/isi-scratch/kieran/admix/synthetic/synthetic-admix/data/type2'
-makefile_dir = "/net/isi-scratch/kieran/admix/synthetic/synthetic-admix/data/makefiles"
+makefile_dir = "/net/isi-scratch/kieran/admix/synthetic/synthetic-admix/data/sra_fastqdump_makefiles"
 
 
 fastq_dump = "/net/isi-software/server/ncbi_sra_toolkit/ncbi_sra_toolkit_2.2.0/bin/fastq-dump" 
