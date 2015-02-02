@@ -40,7 +40,7 @@ TBC
 ### Scripts associated with each stage
 
 Stage | Important scripts | Target directory
-------------------------------------------------------
+-------| ---------------------| ------------------
 Cell selecting | `monocle_select.R` | Currently `src/`
 Downloading SRA | `download_typeA`, `download_typeB` | `/net/isi-scratch/kieran/ncbi`, `data/type1`,`data/type2`
 Converting SRA to fastq | `fastqmakefilecreate.py` | `data/sra_fastqdump_makefiles`
