@@ -120,7 +120,7 @@ class SyntheticAdmixCreator:
 		""" select reads_per_cell reads at random from cell file in directory, and output
 		to outfilestream """
 		if self.paired_end:
-			print "Reading %s" % cell_file
+			#print "Reading %s" % cell_file
 			fs = [gzip.open(os.path.join(directory, f),'rb') for f in [cell_file + x + ".fastq.gz" for x in ("_1","_2")]]
 			
 			lines = [f.readlines() for f in fs]
