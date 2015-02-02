@@ -27,6 +27,22 @@ individual bash script to the cluster, so after running this python script call 
 
 #### 4. Create synthetic .fastq.gz files using `createadmix.py`
 
+The python module `createadmix.py` can take a set of fastq.gz files corresponding to different cell types
+(each cell type must be a different directory, but there is no limit on the number of cell types supported) and will
+create synthetic bulk RNA-seq samples based on mixing the cell types in known ratios. To use this, run `generate_admix_makefiles.py` which will create python scripts based on `admix_template.py` to call `createadmix.py` 
+on different mixture ratios (currently 0.1, 0.2,...,0.9). It will also write bash scripts to call these python scripts and a final bash script `makefile` that submits all jobs to the cluster. The directory for all generated python and bash scripts is `/net/isi-scratch/kieran/admix/synthetic/synthetic-admix/data/synth_fastq_makefiles`.
 
 
 #### 5. Compute transcript quantification using `tophat` and `cufflinks`
+
+TBC
+
+### Scripts associated with each stage
+
+Stage | Important scripts | Target directory
+------------------------------------------------------
+Cell selecting | `monocle_select.R` | Currently `src/`
+Downloading SRA | `download_typeA`, `download_typeB` | `/net/isi-scratch/kieran/ncbi`, `data/type1`,`data/type2`
+Converting SRA to fastq | `fastqmakefilecreate.py` | `data/sra_fastqdump_makefiles`
+Creating synthetic data | `createadmix.py`, `admix_template.py`, `generate_admix_makefiles.py` | data/synth_fastq_makefiles`, `/data/admix_output`
+
