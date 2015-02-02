@@ -9,7 +9,7 @@ Use as a template to create synthetic admix for 2 cell types. Params
 
 dir1 = "/net/isi-scratch/kieran/admix/synthetic/synthetic-admix/data/type1"
 dir2 = "/net/isi-scratch/kieran/admix/synthetic/synthetic-admix/data/type2"
-output_file = "/net/isi-scratch/kieran/admix/synthetic/synthetic-admix/data/admix_output/out<MIXPROP1>.fastq.gz"
+output_file = "/net/isi-scratch/kieran/admix/synthetic/synthetic-admix/data/admix_output/out<STR_MIXPROP>.fastq.gz"
 
 import imp
 import numpy as np
