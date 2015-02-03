@@ -98,4 +98,48 @@ for makefile in makefiles:
 	f.write('nice -19 qsub -pe dedicated 4 -q medium_jobs.q -cwd -N "' + process_name + '" ' + makefile + "\n")
 f.close()
 
+bulk_abund = abund_dirs[0]
+single_abund = abund_dirs[1] + abund_dirs[2]
+bulk_names = all_files[0]
+single_names = all_files[1] + all_files[2]
+
+
+bulk = [os.path.join(s,"abundances.cxb") for s in bulk_abund]
+single = [os.path.join(s,"abundances.cxb") for s in single_abund]
+
+sample_sheet_dir = "/net/isi-scratch/kieran/admix/synthetic/synthetic-admix/data/transcript_quant/norm_abund"
+
+def write_sample_sheet(file_name, cxb_paths, cell_names):
+	f = open(os.path.join(sample_sheet_dir, file_name),'w')
+	f.write("sample_name\tgroup\n")
+	for item in zip(cxb_paths,cell_names):
+		f.write(item[0] + "\t" + item[1] + "\n")
+	f.close()
+
+fnames = ["bulk_sample_sheet.txt","single_sample_sheet.txt"]
+
+write_sample_sheet(fnames[0], bulk, bulk_names)
+write_sample_sheet(fnames[1], single, single_names)
+
+outdirs = ["bulk","single"]
+
+cmd = "CUFFNORM=/net/isi-scratch/kieran/tools/cufflinks-2.2.1.Linux_x86_64/cuffnorm\n"
+cmd += "$CUFFNORM --use-sample-sheet -o <outdir> /net/isi-mirror/ucsc/hg19/hg19_genes.gtf <sample_sheet>\n"
+
+makefile_names = []
+
+for i in (0,1):
+	c = cmd.replace("<outdir>",os.path.join(sample_sheet_dir,outdirs[i]))
+	c = c.replace("<sample_sheet>",os.path.join(sample_sheet_dir,fnames[i]))
+	makefile_name = os.path.join(sample_sheet_dir,outdirs[i] + "_makefile")
+	makefile_names.append(makefile_name)
+	f = open(makefile_name,'w')
+	f.write(c)
+	f.close()
+
+f = open(os.path.join(sample_sheet_dir,"makefile"),'w')
+for n in makefile_names:
+	f.write('nice -19 qsub -q medium_jobs.q -cwd -N "cuffnorm" '+ n + "\n")	
+f.close()
+
 

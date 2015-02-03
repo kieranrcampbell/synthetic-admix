@@ -33,9 +33,11 @@ create synthetic bulk RNA-seq samples based on mixing the cell types in known ra
 on different mixture ratios (currently 0.1, 0.2,...,0.9). It will also write bash scripts to call these python scripts and a final bash script `makefile` that submits all jobs to the cluster. The directory for all generated python and bash scripts is `/net/isi-scratch/kieran/admix/synthetic/synthetic-admix/data/synth_fastq_makefiles`.
 
 
-#### 5. Compute transcript quantification using `tophat` and `cufflinks`
+#### 5. Compute expression estimates using `tophat` and `cufflinks`
 
-TBC
+The script `generate_tc_makefiles.py` must then be called to generate a set of makefiles that call `tophat`, `cuffquant` then `cuffnorm`. These target all synthetic bulk and single cell data, stored in `data/admix_output` and `data/type12`. This script will generate a (large) set of makefiles (just bash scripts) that are stored in `data/transcript_quant/makefiles`, including a master makefile that submits all others to the cluster (with 4 cores each). The alignments from tophat are stored in `data/transcript_quant/alignments` and the resulting abundances stored in cxb format in `data/transcript_quant/abundance`.
+
+The application `cuffnorm` is then used to normalise fpkm values onto a single scale. For this case, synthetic bulk and single-cell data are normalised separately. `generate_tc_makefiles.py` generates the sample sheets required by cuffnorm as well as makefiles for calling cuffnorm in `data/transcript_quant/norm_abund`, as well as (once more) a master makefile to submit both to the cluster. The resulting expression estimates are stored in `data/transcript_quant/norm_abund/single` and `data/transcript_quant/norm_abund/bulk`.
 
 ### Scripts associated with each stage
 
@@ -44,5 +46,6 @@ Stage | Important scripts | Target directory
 Cell selecting | `monocle_select.R` | Currently `src/`
 Downloading SRA | `download_typeA`, `download_typeB` | `/net/isi-scratch/kieran/ncbi`, `data/type1`,`data/type2`
 Converting SRA to fastq | `fastqmakefilecreate.py` | `data/sra_fastqdump_makefiles`
-Creating synthetic data | `createadmix.py`, `admix_template.py`, `generate_admix_makefiles.py` | `data/synth_fastq_makefiles`, `/data/admix_output`
+Creating synthetic data | `createadmix.py`, `admix_template.py`, `generate_admix_makefiles.py` | `data/synth_fastq_makefiles`, `data/admix_output`
+Computing expression estimates | `generate_tc_makefiles.py` | `data/transcript_quant/makefiles`, `data/transcript_quant/norm_abund`
 
