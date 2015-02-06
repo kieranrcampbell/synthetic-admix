@@ -5,12 +5,12 @@ Create synthetic bulk RNA-seq data from a mix of single-cell data of known types
 
 The basic workflow is as follows (all scripts can be found in `/src/` directory):
 
-#### 1. Select 40 cells from the `monocle` dataset
+#### 1. Select 80 cells from the `monocle` dataset
 
-The script `monocle_select.R` loads in the monocle dataset. It selects 20 cells from the begining 
-of pseudotime (type_1 proliferating cells) and 20 cells from the end of pseudotime (type_2 or differentiating
+The script `monocle_select.R` loads in the monocle dataset. It selects 40 cells from the begining 
+of pseudotime (type_1 proliferating cells) and 40 cells from the end of pseudotime (type_2 or differentiating
 myoblasts.) It then finds the SRX then SRR IDs of the files and writes two bash scripts, download_type1
-and download_type2.
+and download_type2. It also writes `data/meta.csv` and assigns half of each type of cells to contribute to either the bulk data or the single-cell data. This is done at random, though the seed is kept constant so it should always be the same. Since we will never sequence the single cells that contribute to the bulk data, it makes sense to choose different cells of the same type to make the single and bulk data estimates.
 
 #### 2. Download the corresponding SRA files using `prefetch` from sra-toolkit
 
@@ -32,12 +32,16 @@ The python module `createadmix.py` can take a set of fastq.gz files correspondin
 create synthetic bulk RNA-seq samples based on mixing the cell types in known ratios. To use this, run `generate_admix_makefiles.py` which will create python scripts based on `admix_template.py` to call `createadmix.py` 
 on different mixture ratios (currently 0.1, 0.2,...,0.9). It will also write bash scripts to call these python scripts and a final bash script `makefile` that submits all jobs to the cluster. The directory for all generated python and bash scripts is `/net/isi-scratch/kieran/admix/synthetic/synthetic-admix/data/synth_fastq_makefiles`.
 
+Note that this will only create the synthetic files using the cells that have been marked as bulk in `data/meta.csv` -> `usage_type`.
+
 
 #### 5. Compute expression estimates using `tophat` and `cufflinks`
 
 The script `generate_tc_makefiles.py` must then be called to generate a set of makefiles that call `tophat`, `cuffquant` then `cuffnorm`. These target all synthetic bulk and single cell data, stored in `data/admix_output` and `data/type12`. This script will generate a (large) set of makefiles (just bash scripts) that are stored in `data/transcript_quant/makefiles`, including a master makefile that submits all others to the cluster (with 4 cores each). The alignments from tophat are stored in `data/transcript_quant/alignments` and the resulting abundances stored in cxb format in `data/transcript_quant/abundance`.
 
 The application `cuffnorm` is then used to normalise fpkm values onto a single scale. For this case, synthetic bulk and single-cell data are normalised separately. `generate_tc_makefiles.py` generates the sample sheets required by cuffnorm as well as makefiles for calling cuffnorm in `data/transcript_quant/norm_abund`, as well as (once more) a master makefile to submit both to the cluster. The resulting expression estimates are stored in `data/transcript_quant/norm_abund/single` and `data/transcript_quant/norm_abund/bulk`.
+
+Note that the single cell estimates only use the cells designated as `single` in `data/meta.csv` -> `usage_type`.
 
 ### Scripts associated with each stage
 
