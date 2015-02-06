@@ -7,7 +7,7 @@ import numpy as np
 import os
 
 makefile_dir = "/net/isi-scratch/kieran/admix/synthetic/synthetic-admix/data/synth_fastq_makefiles"
-
+meta_file = "/net/isi-scratch/kieran/admix/synthetic/synthetic-admix/data/meta.csv"
 
 template_file = "admix_template.py"
 

@@ -6,6 +6,8 @@ library(monocle)
 library(GEOquery)
 library(SRAdb)
 
+set.seed(123)
+
 data(HSMM)
 
 setwd("/net/isi-scratch/kieran/admix/synthetic/cell_selection")
@@ -24,8 +26,8 @@ prol_diff <- pd[pd$State != 3,]
 pd_sorted <- prol_diff[order(prol_diff$Pseudotime),]
 
 N <- dim(pd_sorted)[1]
-state1_cells <- as.character(pd_sorted$cell_id[1:20])
-state2_cells <- as.character(pd_sorted$cell_id[(N-19):N])
+state1_cells <- as.character(pd_sorted$cell_id[1:40])
+state2_cells <- as.character(pd_sorted$cell_id[(N-39):N])
 
 gse_no <- "GSE52529"
 gse <- getGEO(gse_no)
@@ -51,6 +53,8 @@ sra <- "SRP033135"
 
 if(!file.exists('SRAdb.sqlite')) {
   sqlfile <- getSRAdbFile()
+} else {
+  sqlfile <- 'SRAmetadb.sqlite'
 }
 
 sra_con <- dbConnect('SQLite',sqlfile)
@@ -60,6 +64,31 @@ rownames(l) <- l$experiment
 srr_ids <- lapply(srx_ids,function(srx_id) {
   return(l[srx_id,]$run)
 })
+
+
+# Construct metadata file -------------------------------------------------
+
+df_meta <- data.frame(cell_name = c(state1_cells,state2_cells))
+df_meta$cell_type <- c(rep(1,40),rep(2,40))
+df_meta$cell_type_name <- c(rep("proliferating_cell",40),rep("differentiating_myoblast",40))
+df_meta$srx_ids <- unlist(srx_ids)
+
+df_meta$srr_ids <- unlist(srr_ids)
+
+## want to choose half the samples from each type to be used for the synthetic bulk,
+## and half to be for single-cell samples. df_meta$usage_type is 'bulk' for those to
+## be used as bulk, and 'single' for those to be used as single, decided randomly
+## (but with a fixed set seed)
+
+df_meta$usage_type <- "bulk"
+single_index <- c(sample(1:40,20),sample(41:80,20))
+df_meta$usage_type[single_index] <- "single"
+
+
+
+write.csv(df_meta, file="/net/isi-scratch/kieran/admix/synthetic/synthetic-admix/data/meta.csv",row.names=F)
+stop("done")
+
 
 cmd <- '$PREFETCH -t ascp -a "/home/kieranc/.aspera/connect/bin/ascp|/home/kieranc/.aspera/connect/etc/asperaweb_id_dsa.openssh"'
 

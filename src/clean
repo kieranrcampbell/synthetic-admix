@@ -1,0 +1,28 @@
+# clean all not needed
+
+DATA_DIR=/net/isi-scratch/kieran/admix/synthetic/synthetic-admix/data
+
+# get rid of .fastq.gz files
+rm -f $DATA_DIR/type1/*.fastq.gz
+rm -f $DATA_DIR/type2/*.fastq.gz
+
+# remove sra -> fastq makefiles
+rm -f $DATA_DIR/sra_fastqdump_makefiles/SRR*
+
+# remove admixed files
+rm -f $DATA_DIR/admix_output/*.fastq.gz
+
+# remove makefiles for admix
+rm -f $DATA_DIR/synth_fastq_makefiles/makefil*
+rm -f $DATA_DIR/synth_fastq_makefiles/admix*
+
+# remove cufflinks-tophat files
+rm -f $DATA_DIR/transcript_quant/makefiles/*
+
+rm -rf $DATA_DIR/transcript_quant/abundance/*
+rm -rf $DATA_DIR/transcript_quant/alignments/*
+
+# remove normalisation
+rm -rf $DATA_DIR/transcript_quant/norm_abund/*
+
+

@@ -3,6 +3,7 @@ Generate bash script makefiles for tophat - cufflinks quantification
 """
 
 import os
+import pandas as pd
 
 TC_bash_template = "export PATH=/net/isi-scratch/kieran/tools/bowtie2-2.2.4:$PATH\n"
 TC_bash_template += "TOPHAT=/net/isi-scratch/kieran/tools/tophat-2.0.13.Linux_x86_64/tophat\n"
@@ -29,6 +30,13 @@ We have:
 
 """
 
+meta_file = "/net/isi-scratch/kieran/admix/synthetic/synthetic-admix/data/meta.csv"
+df_meta = pd.read_csv(meta_file,index_col=False)
+
+""" Only want to compute expression estimates for single cells not included in bulk estimates """
+single_srr =  df_meta['srr_ids'][df_meta['usage_type'] == 'single'].tolist()
+
+
 data_path = "/net/isi-scratch/kieran/admix/synthetic/synthetic-admix/data/"
 cell_types = ["admix_output","type1","type2"]
 
@@ -42,6 +50,11 @@ def get_unique_names(d):
 	return list(set(files))
 
 all_files = [get_unique_names(d) for d in all_dirs]
+
+""" strip out any bulk examples """
+all_files[1] = list(set(all_files[1]).intersection(set(single_srr)))
+all_files[2] = list(set(all_files[2]).intersection(set(single_srr)))
+
 
 align_dir = os.path.join(data_path, "transcript_quant","alignments")
 abund_dir = os.path.join(data_path, "transcript_quant","abundance")
@@ -122,6 +135,12 @@ write_sample_sheet(fnames[0], bulk, bulk_names)
 write_sample_sheet(fnames[1], single, single_names)
 
 outdirs = ["bulk","single"]
+
+for d in outdirs:
+	if not os.path.join(sample_sheet_dir, d):
+		os.makedirs(os.path.join(sample_sheet_dir,d))
+
+		
 
 cmd = "CUFFNORM=/net/isi-scratch/kieran/tools/cufflinks-2.2.1.Linux_x86_64/cuffnorm\n"
 cmd += "$CUFFNORM --use-sample-sheet -o <outdir> /net/isi-mirror/ucsc/hg19/hg19_genes.gtf <sample_sheet>\n"
